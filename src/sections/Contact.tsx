@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { config } from "../config/site";
+import { isFormSubmitEndpoint, sendContact } from "../lib/contact";
 export default function Contact() {
   const [status, setStatus] = useState<
     "idle" | "sending" | "success" | "error"
@@ -9,7 +10,7 @@ export default function Contact() {
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    if (!form.reportValidity()) return;
+    if (status === "sending" || !form.reportValidity()) return;
     if (!config.contactEndpoint) {
       setStatus("error");
       setMessage(
@@ -21,19 +22,25 @@ export default function Contact() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
     try {
-      const payload = Object.fromEntries(new FormData(form));
-      const response = await fetch(config.contactEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-      if (!response.ok) throw new Error("Falha no envio");
-      const data = await response.json();
-      if (data.success !== true) throw new Error("Confirmação não recebida");
+      const fields = Object.fromEntries(new FormData(form)) as Record<
+        string,
+        string
+      >;
+      const result = await sendContact(
+        config.contactEndpoint,
+        fields,
+        controller.signal,
+      );
+      if (result === "activation") {
+        setStatus("error");
+        setMessage(
+          "O canal de contato está aguardando ativação. Sua solicitação foi recebida pelo serviço, mas a entrega ainda não foi confirmada.",
+        );
+        return;
+      }
       setStatus("success");
       setMessage(
-        "Mensagem enviada. Obrigado por compartilhar sua ideia com a O.R.I.O.N.",
+        "Solicitação recebida pelo serviço de envio. Obrigado por compartilhar sua ideia com a O.R.I.O.N.",
       );
       form.reset();
     } catch {
@@ -74,7 +81,19 @@ export default function Contact() {
           <span className="status-dot" /> Novas ideias são bem-vindas.
         </div>
       </div>
-      <form onSubmit={submit} className="contact-form">
+      <form
+        onSubmit={submit}
+        className="contact-form"
+        aria-busy={status === "sending"}
+      >
+        <input
+          type="text"
+          name="_honey"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
         <div className="field-row">
           <label>
             Seu nome
@@ -130,6 +149,8 @@ export default function Contact() {
         </label>
         <p className="form-note">
           Seus dados serão utilizados apenas para responder ao seu contato.
+          {isFormSubmitEndpoint(config.contactEndpoint) &&
+            " O envio é processado pelo FormSubmit."}
         </p>
         <button
           className="button gold"

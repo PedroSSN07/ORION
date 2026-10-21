@@ -26,24 +26,35 @@ O build gera `dist/`, que pode ser publicado em uma hospedagem estática com HTT
 
 Copie `.env.example` para `.env.local`, preencha os campos disponíveis e gere um novo build. Todas as variáveis `VITE_` são públicas: nunca coloque tokens secretos nelas.
 
-| Variável              | Finalidade                                                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Variável              | Finalidade                                                                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | VITE_LOGO_URL         | Caminho da logo original, por exemplo `/logo.webp`. Coloque o arquivo em `public/`. A logo fornecida já está integrada em `/orion-futurista.png`; esta variável permite substituição opcional. |
-| VITE_CONTACT_ENDPOINT | URL HTTPS de um backend que aceite o contrato de contato abaixo.                                                                                                                              |
-| VITE_WHATSAPP_NUMBER  | Número real com código de país e DDD, somente dígitos. Ausente: link oculto.                                                                                                                  |
-| VITE_INSTAGRAM_URL    | URL HTTPS real. Ausente: link oculto.                                                                                                                                                         |
-| VITE_LINKEDIN_URL     | URL HTTPS real. Ausente: link oculto.                                                                                                                                                         |
-| VITE_SITE_URL         | Origem pública final, como `https://seu-dominio.com.br`. Gera canonical, og:url e sitemap.xml no build. Sem domínio, não são inventadas URLs.                                                 |
+| VITE_CONTACT_ENDPOINT | URL HTTPS de um backend que aceite o contrato de contato abaixo.                                                                                                                               |
+| VITE_WHATSAPP_NUMBER  | Número real com código de país e DDD, somente dígitos. Ausente: link oculto.                                                                                                                   |
+| VITE_INSTAGRAM_URL    | URL HTTPS real. Ausente: link oculto.                                                                                                                                                          |
+| VITE_LINKEDIN_URL     | URL HTTPS real. Ausente: link oculto.                                                                                                                                                          |
+| VITE_SITE_URL         | Origem pública final, como `https://seu-dominio.com.br`. Gera canonical, og:url e sitemap.xml no build. Sem domínio, não são inventadas URLs.                                                  |
 
-A logo original foi integrada sem alterar o arquivo. O cabeçalho e a seção Sobre apresentam a arte completa; o rodapé também exibe a logo completa, sem recortes. Os dados reais de contato ainda precisam ser configurados. Os conceitos Atlas e Forma são estudos autorais; não representam clientes ou resultados da empresa. Os mockups são construídos em CSS, sem fotografias de terceiros.
+A logo original foi integrada sem alterar o arquivo. O cabeçalho e a seção Sobre apresentam a arte completa; o rodapé também exibe a logo completa, sem recortes. O e-mail de destino está configurado; WhatsApp e redes sociais continuam opcionais. Os conceitos Atlas e Forma são estudos autorais; não representam clientes ou resultados da empresa. Os mockups são construídos em CSS, sem fotografias de terceiros.
 
-## Contrato de contato
+## Contato por e-mail
 
-O frontend envia `POST` JSON com `name`, `email`, `projectType` e `message`. O servidor deve validar os campos, aplicar limite de requisições e proteção contra abuso, permitir CORS apenas para a origem do site e realizar o envio/armazenamento de verdade. Credenciais do provedor ficam somente no servidor.
+O formulário está configurado para `pedrosebastiaojl@gmail.com` usando o endpoint AJAX do FormSubmit. Funciona em hospedagem estática, sem senha do Gmail, chave privada ou servidor próprio. `VITE_CONTACT_ENDPOINT` permite substituir o destino padrão; variáveis VITE são públicas.
 
-Uma confirmação exige HTTP 2xx **e** JSON `{"success":true}` retornado apenas após o serviço aceitar a mensagem. Qualquer outra resposta, erro de rede ou timeout de 15 segundos apresenta falha, mantendo os dados do formulário. Sem endpoint configurado, o site informa que o canal está sendo preparado; nenhum sucesso é simulado. Não há backend de envio incluído nem entrega de e-mail validada neste projeto.
+### Ativar o recebimento
 
-Antes de operar o canal, ajuste o aviso de tratamento dos dados às práticas reais da empresa e informe seu contato de privacidade.
+1. Execute `npm run dev` e abra o endereço HTTP do Vite (não abra index.html diretamente).
+2. Preencha e envie uma mensagem de teste pelo formulário.
+3. Abra a caixa de entrada de `pedrosebastiaojl@gmail.com`, incluindo Spam, e confirme o e-mail de ativação do FormSubmit.
+4. Faça outro envio e confira o recebimento real. Ao mudar para o domínio de produção, teste novamente e confirme eventual nova ativação.
+
+A integração foi validada por testes locais com respostas simuladas do provedor; a entrega real e a ativação ainda dependem da confirmação na caixa de e-mail. O site só apresenta confirmação após resposta positiva do serviço, e não afirma que a mensagem já chegou ao Gmail. Sem ativação, o provedor pode reter mensagens até a confirmação. Uma resposta explícita de ativação pendente mantém os campos preenchidos.
+
+As mensagens incluem nome, e-mail, tipo de projeto e texto; o assunto é “Novo contato pelo site O.R.I.O.N.” e Reply-To aponta ao visitante. Há campo honeypot e as proteções padrão do provedor não são desativadas. Os dados passam pelo FormSubmit, informado junto ao botão de envio. O serviço precisa estar acessível pela rede.
+
+Para usar um backend próprio, configure VITE_CONTACT_ENDPOINT. Ele deve aceitar POST JSON com os campos do formulário e retornar HTTP 2xx e `{"success":true}` somente depois de aceitar a mensagem. Erros de rede, HTTP, resposta inválida e timeout de 15 segundos mantêm os dados para nova tentativa. Nunca coloque credenciais de e-mail em variáveis VITE.
+
+Documentação: https://formsubmit.co/ajax-documentation e https://formsubmit.co/help.
 
 ## Estrutura
 
@@ -79,5 +90,18 @@ Não é necessário comprar ou configurar domínio para desenvolver e testar. VS
 
 O áudio continua opt-in. Ao ativar, o volume manual começa em 45%; o topo usa esse nível integral e o fim da página usa 12% dele, com transição suave e reversível ao subir. O controle manual afeta tanto o ambiente quanto os cliques. Todos os cliques na página usam um toque digital curto de duas vozes, incluindo áreas vazias e controles. O ambiente é uma frase musical original de 32 segundos com notas suaves e espaçadas, em volume baixo, substituindo o drone grave contínuo. A aba oculta fica silenciosa. A logo completa original aparece no cabeçalho, com dimensão adaptada para celular.
 
+## GitHub Pages
 
+Em Settings > Pages > Build and deployment, selecione **GitHub Actions** como Source. O workflow `.github/workflows/pages.yml` instala dependências, executa verificações, compila com Vite e publica exclusivamente `dist/` a cada push em `main`.
 
+Não publique a pasta raiz do repositório: seu index.html referencia TypeScript de desenvolvimento, que o navegador não executa diretamente. O workflow determina a subpasta pelo GitHub Pages; a logo, os cursores e os scripts acompanham esse caminho. Para este repositório, a URL é https://pedrossn07.github.io/ORION/.
+
+Para verificar o mesmo build localmente em PowerShell:
+
+```powershell
+$env:VITE_BASE_PATH = '/ORION/'
+npm run build
+npm run preview
+```
+
+Abra http://127.0.0.1:4173/ORION/. Para voltar ao padrão em outro build, use `Remove-Item Env:VITE_BASE_PATH`. Ao configurar um domínio próprio, o workflow usa o caminho atualizado informado pelo Pages.

@@ -3,8 +3,11 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "VITE_");
-  const site = env.VITE_SITE_URL ? new URL(env.VITE_SITE_URL).origin : "";
+  const site = env.VITE_SITE_URL
+    ? new URL(env.VITE_SITE_URL).href.replace(/\/$/, "")
+    : "";
   return {
+    base: env.VITE_BASE_PATH || "/",
     plugins: [
       react(),
       tailwindcss(),
