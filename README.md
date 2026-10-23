@@ -13,6 +13,8 @@ npm run dev
 
 Abra o endereço informado pelo Vite. Comandos de verificação:
 
+No Windows, você também pode executar `abrir-site.cmd`: ele inicia o Vite e abre o navegador. Mantenha a janela aberta enquanto usa o site. Não abra `index.html` diretamente; React e TypeScript precisam do servidor Vite. Se o PowerShell bloquear `npm.ps1`, use `npm.cmd run dev`.
+
 ```sh
 npm run lint
 npm test
@@ -29,32 +31,19 @@ Copie `.env.example` para `.env.local`, preencha os campos disponíveis e gere u
 | Variável              | Finalidade                                                                                                                                                                                     |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | VITE_LOGO_URL         | Caminho da logo original, por exemplo `/logo.webp`. Coloque o arquivo em `public/`. A logo fornecida já está integrada em `/orion-futurista.png`; esta variável permite substituição opcional. |
-| VITE_CONTACT_ENDPOINT | URL HTTPS de um backend que aceite o contrato de contato abaixo.                                                                                                                               |
-| VITE_WHATSAPP_NUMBER  | Número real com código de país e DDD, somente dígitos. Ausente: link oculto.                                                                                                                   |
 | VITE_INSTAGRAM_URL    | URL HTTPS real. Ausente: link oculto.                                                                                                                                                          |
 | VITE_LINKEDIN_URL     | URL HTTPS real. Ausente: link oculto.                                                                                                                                                          |
 | VITE_SITE_URL         | Origem pública final, como `https://seu-dominio.com.br`. Gera canonical, og:url e sitemap.xml no build. Sem domínio, não são inventadas URLs.                                                  |
 
-A logo original foi integrada sem alterar o arquivo. O cabeçalho e a seção Sobre apresentam a arte completa; o rodapé também exibe a logo completa, sem recortes. O e-mail de destino está configurado; WhatsApp e redes sociais continuam opcionais. Os conceitos Atlas e Forma são estudos autorais; não representam clientes ou resultados da empresa. Os mockups são construídos em CSS, sem fotografias de terceiros.
+A logo original foi integrada sem alterar o arquivo. O cabeçalho e a seção Sobre apresentam a arte completa; o rodapé também exibe a logo completa, sem recortes. O WhatsApp está configurado; as redes sociais continuam opcionais. Os conceitos Atlas e Forma são estudos autorais; não representam clientes ou resultados da empresa. Os mockups são construídos em CSS, sem fotografias de terceiros.
 
-## Contato por e-mail
+## Contato pelo WhatsApp
 
-O formulário está configurado para `pedrosebastiaojl@gmail.com` usando o endpoint AJAX do FormSubmit. Funciona em hospedagem estática, sem senha do Gmail, chave privada ou servidor próprio. `VITE_CONTACT_ENDPOINT` permite substituir o destino padrão; variáveis VITE são públicas.
+O painel de contato abre `https://wa.me/5588996645739` em uma nova aba. O número fica em `src/config/site.ts`. Não há formulário, coleta de dados ou envio pelo FormSubmit.
 
-### Ativar o recebimento
+A conversa abre com a mensagem “Olá! Vim pelo site da ORION e gostaria de conversar sobre um projeto.” preenchida. O visitante confirma o envio no WhatsApp.
 
-1. Execute `npm run dev` e abra o endereço HTTP do Vite (não abra index.html diretamente).
-2. Preencha e envie uma mensagem de teste pelo formulário.
-3. Abra a caixa de entrada de `pedrosebastiaojl@gmail.com`, incluindo Spam, e confirme o e-mail de ativação do FormSubmit.
-4. Faça outro envio e confira o recebimento real. Ao mudar para o domínio de produção, teste novamente e confirme eventual nova ativação.
-
-A integração foi validada por testes locais com respostas simuladas do provedor; a entrega real e a ativação ainda dependem da confirmação na caixa de e-mail. O site só apresenta confirmação após resposta positiva do serviço, e não afirma que a mensagem já chegou ao Gmail. Sem ativação, o provedor pode reter mensagens até a confirmação. Uma resposta explícita de ativação pendente mantém os campos preenchidos.
-
-As mensagens incluem nome, e-mail, tipo de projeto e texto; o assunto é “Novo contato pelo site O.R.I.O.N.” e Reply-To aponta ao visitante. Há campo honeypot e as proteções padrão do provedor não são desativadas. Os dados passam pelo FormSubmit, informado junto ao botão de envio. O serviço precisa estar acessível pela rede.
-
-Para usar um backend próprio, configure VITE_CONTACT_ENDPOINT. Ele deve aceitar POST JSON com os campos do formulário e retornar HTTP 2xx e `{"success":true}` somente depois de aceitar a mensagem. Erros de rede, HTTP, resposta inválida e timeout de 15 segundos mantêm os dados para nova tentativa. Nunca coloque credenciais de e-mail em variáveis VITE.
-
-Documentação: https://formsubmit.co/ajax-documentation e https://formsubmit.co/help.
+O painel reage ao mouse com iluminação e inclinação. Anéis, estrelas decorativas e esculturas orbitais giram automaticamente. A preferência de movimento reduzido desativa esses efeitos.
 
 ## Estrutura
 
@@ -64,13 +53,13 @@ Documentação: https://formsubmit.co/ajax-documentation e https://formsubmit.co
 - `src/components/ui`: áudio opt-in.
 - `src/sections`: projetos, universo e contato.
 - `src/styles/global.css`: design system, composição e responsividade.
-- `tests/`: verificações de integridade de links e guardas de confirmação de envio.
+- `tests/`: verificações de integridade de links e comportamento do áudio.
 
 ## Interação e acessibilidade
 
-Motion controla entradas e transições; GSAP/ScrollTrigger controla revelações e linha da metodologia; Lenis suaviza navegação apenas quando movimento reduzido não está solicitado. Tailwind está integrado ao Vite; estilos autorais definem o design system.
+Motion controla transições e o progresso da metodologia. IntersectionObserver revela as seções uma única vez; CSS oferece rolagem suave, respeitando movimento reduzido. Não há dependência de GSAP ou Lenis. Tailwind está integrado ao Vite; estilos autorais definem o design system.
 
-A cena utiliza Three.js, React Three Fiber e Drei, carregados em chunk separado. O pixel ratio é limitado, com menos estrelas e sem antialias no mobile. Com movimento reduzido, a alternativa CSS estática é usada. Falha de WebGL mantém o visual CSS; os mesmos pilares podem sempre ser selecionados por botões de teclado (setas, Home e End). O render 3D pausa quando a aba fica oculta.
+A cena utiliza Three.js, React Three Fiber e Drei, carregados em chunk separado quando a cena se aproxima da tela. O pixel ratio e a complexidade das geometrias são limitados, com menos estrelas e sem antialias no mobile. Com movimento reduzido, a alternativa CSS estática é usada. Falha de WebGL mantém o visual CSS; os mesmos pilares podem sempre ser selecionados por botões de teclado (setas, Home e End). O render 3D pausa quando a aba fica oculta ou a cena sai da tela, sem recriar a cena a cada rolagem.
 
 Áudio inicia desligado e só cria AudioContext ao clicar no controle. Sons são sintetizados localmente, sem arquivos licenciados. Volume é ajustável. Não há rastreadores, fontes externas, reprodução automática sonora ou dependência de imagens remotas.
 

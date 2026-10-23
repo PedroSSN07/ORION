@@ -1,56 +1,24 @@
-import { useState, type FormEvent } from "react";
-import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+﻿import { type PointerEvent } from "react";
+import { useReducedMotion } from "motion/react";
+import { ArrowUpRight, MessageCircle } from "lucide-react";
 import { config } from "../config/site";
-import { isFormSubmitEndpoint, sendContact } from "../lib/contact";
+
 export default function Contact() {
-  const [status, setStatus] = useState<
-    "idle" | "sending" | "success" | "error"
-  >("idle");
-  const [message, setMessage] = useState("");
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    if (status === "sending" || !form.reportValidity()) return;
-    if (!config.contactEndpoint) {
-      setStatus("error");
-      setMessage(
-        "O canal de envio ainda está sendo preparado. Tente novamente mais tarde.",
-      );
-      return;
-    }
-    setStatus("sending");
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    try {
-      const fields = Object.fromEntries(new FormData(form)) as Record<
-        string,
-        string
-      >;
-      const result = await sendContact(
-        config.contactEndpoint,
-        fields,
-        controller.signal,
-      );
-      if (result === "activation") {
-        setStatus("error");
-        setMessage(
-          "O canal de contato está aguardando ativação. Sua solicitação foi recebida pelo serviço, mas a entrega ainda não foi confirmada.",
-        );
-        return;
-      }
-      setStatus("success");
-      setMessage(
-        "Solicitação recebida pelo serviço de envio. Obrigado por compartilhar sua ideia com a O.R.I.O.N.",
-      );
-      form.reset();
-    } catch {
-      setStatus("error");
-      setMessage(
-        "Não foi possível confirmar o envio. Por favor, tente novamente.",
-      );
-    } finally {
-      clearTimeout(timeout);
-    }
+  const reduced = useReducedMotion();
+  function move(event: PointerEvent<HTMLAnchorElement>) {
+    if (reduced || event.pointerType !== "mouse") return;
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    card.style.setProperty("--mx", `${x * 100}%`);
+    card.style.setProperty("--my", `${y * 100}%`);
+    card.style.setProperty("--rx", `${(0.5 - y) * 8}deg`);
+    card.style.setProperty("--ry", `${(x - 0.5) * 8}deg`);
+  }
+  function reset(event: PointerEvent<HTMLAnchorElement>) {
+    for (const property of ["--mx", "--my", "--rx", "--ry"])
+      event.currentTarget.style.removeProperty(property);
   }
   return (
     <section id="contato" className="contact section">
@@ -64,110 +32,49 @@ export default function Contact() {
           <em>começa aqui.</em>
         </h2>
         <p>
-          Toda grande transformação começa com uma conversa. Conte para nós o
-          que você imagina.
+          Toda grande transformação começa com uma conversa. Compartilhe sua
+          ideia diretamente pelo WhatsApp.
         </p>
-        {config.whatsapp && (
-          <a
-            className="text-link"
-            href={`https://wa.me/${config.whatsapp}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Conversar pelo WhatsApp <ArrowUpRight size={18} />
-          </a>
-        )}
         <div className="contact-coordinate">
           <span className="status-dot" /> Novas ideias são bem-vindas.
         </div>
       </div>
-      <form
-        onSubmit={submit}
-        className="contact-form"
-        aria-busy={status === "sending"}
+      <a
+        className="whatsapp-panel"
+        href={`https://wa.me/${config.whatsapp}?text=${encodeURIComponent(config.whatsappMessage)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onPointerMove={move}
+        onPointerLeave={reset}
+        onPointerCancel={reset}
+        aria-label="Conversar com a O.R.I.O.N. pelo WhatsApp (abre em nova aba)"
       >
-        <input
-          type="text"
-          name="_honey"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          style={{ display: "none" }}
-        />
-        <div className="field-row">
-          <label>
-            Seu nome
-            <input
-              name="name"
-              autoComplete="name"
-              required
-              minLength={2}
-              maxLength={100}
-              placeholder="Como podemos chamar você?"
-            />
-          </label>
-          <label>
-            E-mail
-            <input
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              maxLength={200}
-              placeholder="voce@empresa.com"
-            />
-          </label>
+        <span className="whatsapp-topline">
+          <span>O.R.I.O.N. / CONEXÃO DIRETA</span>
+          <ArrowUpRight size={18} />
+        </span>
+        <div className="whatsapp-visual" aria-hidden="true">
+          <div className="signal-ring" />
+          <div className="signal-ring ring-two" />
+          <div className="signal-ring ring-three" />
+          <span className="whatsapp-core">
+            <MessageCircle size={46} strokeWidth={1.5} />
+          </span>
         </div>
-        <label>
-          O que vamos construir?
-          <select name="projectType" required defaultValue="">
-            <option value="" disabled>
-              Selecione o tipo de projeto
-            </option>
-            {[
-              "Site institucional",
-              "Aplicação ou sistema",
-              "Interface digital",
-              "Automação e integração",
-              "Manutenção e evolução",
-              "Quero explorar uma ideia",
-            ].map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Conte um pouco sobre sua ideia
-          <textarea
-            name="message"
-            required
-            minLength={10}
-            maxLength={5000}
-            rows={4}
-            placeholder="Objetivos, desafios, possibilidades..."
-          />
-        </label>
-        <p className="form-note">
-          Seus dados serão utilizados apenas para responder ao seu contato.
-          {isFormSubmitEndpoint(config.contactEndpoint) &&
-            " O envio é processado pelo FormSubmit."}
-        </p>
-        <button
-          className="button gold"
-          disabled={status === "sending"}
-          type="submit"
-        >
-          {status === "sending" ? "Enviando..." : "Enviar mensagem"}
-          {status === "success" ? (
-            <CheckCircle2 size={18} />
-          ) : (
-            <ArrowUpRight size={18} />
-          )}
-        </button>
-        <p className={`form-status ${status}`} role="status">
-          {message}
-        </p>
-      </form>
+        <span className="whatsapp-label">DA SUA IDEIA AO PRÓXIMO PASSO</span>
+        <h3>
+          Vamos conectar
+          <br />
+          possibilidades.
+        </h3>
+        <p>Uma conversa para começar a construir o que vem a seguir.</p>
+        <span className="whatsapp-cta">
+          Conversar no WhatsApp <ArrowUpRight size={20} />
+        </span>
+        <span className="whatsapp-footnote">
+          Abre em uma nova aba · Sem formulário
+        </span>
+      </a>
     </section>
   );
 }

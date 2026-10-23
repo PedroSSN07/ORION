@@ -3,6 +3,7 @@ import {
   motion,
   useReducedMotion,
   useScroll,
+  useTransform,
   MotionConfig,
 } from "motion/react";
 import {
@@ -16,9 +17,6 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
 import Header, { Brand } from "./components/layout/Header";
 import AudioControl from "./components/ui/AudioControl";
 import PointerEffects from "./components/ui/PointerEffects";
@@ -27,7 +25,6 @@ import Contact from "./sections/Contact";
 import Projects from "./sections/Projects";
 import Universe from "./sections/Universe";
 import { config, solutions } from "./config/site";
-gsap.registerPlugin(ScrollTrigger);
 const icons = [Code2, Layers3, PenTool, Workflow, RefreshCw];
 const steps = [
   [
@@ -50,45 +47,36 @@ const steps = [
 export default function App() {
   const reduced = useReducedMotion();
   const root = useRef<HTMLDivElement>(null);
+  const method = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll();
+  const { scrollYProgress: methodProgress } = useScroll({
+    target: method,
+    offset: ["start 0.8", "end 0.65"],
+  });
+  const timelineScale = useTransform(methodProgress, [0, 1], [0, 1]);
   useEffect(() => {
-    if (reduced) return;
-    const lenis = new Lenis({ duration: 1.05, anchors: true });
-    let frame = 0;
-    function tick(time: number) {
-      lenis.raf(time);
-      frame = requestAnimationFrame(tick);
-    }
-    frame = requestAnimationFrame(tick);
-    const context = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) =>
-        gsap.from(el, {
-          y: 28,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: { trigger: el, start: "top 92%", once: true },
-        }),
-      );
-      gsap.fromTo(
-        ".timeline-progress",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".method",
-            start: "top 80%",
-            end: "bottom 65%",
-            scrub: true,
-          },
-        },
-      );
-    }, root);
+    if (reduced || !root.current) return;
+    const elements = root.current.querySelectorAll<HTMLElement>(".reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.remove("reveal-pending");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
+    );
+    elements.forEach((element) => {
+      // Content already on screen must never disappear during initialization.
+      if (element.getBoundingClientRect().top < window.innerHeight * 0.92)
+        return;
+      element.classList.add("reveal-pending");
+      observer.observe(element);
+    });
     return () => {
-      cancelAnimationFrame(frame);
-      lenis.destroy();
-      context.revert();
+      observer.disconnect();
+      elements.forEach((element) => element.classList.remove("reveal-pending"));
     };
   }, [reduced]);
   return (
@@ -284,7 +272,11 @@ export default function App() {
               </a>
             </div>
           </section>
-          <section id="metodologia" className="section method reveal">
+          <section
+            ref={method}
+            id="metodologia"
+            className="section method reveal"
+          >
             <div className="section-heading">
               <div>
                 <p className="eyebrow">03 / DA IDEIA AO IMPACTO</p>
@@ -301,7 +293,10 @@ export default function App() {
               </p>
             </div>
             <div className="timeline">
-              <div className="timeline-progress" />
+              <motion.div
+                className="timeline-progress"
+                style={{ scaleX: reduced ? 1 : timelineScale }}
+              />
               {steps.map(([title, text], i) => (
                 <article key={title}>
                   <span className="step-number">0{i + 1}</span>

@@ -12,15 +12,15 @@ function Sculpture({
   const group = useRef<THREE.Group>(null);
   useFrame(({ clock, pointer }) => {
     if (!group.current) return;
-    group.current.rotation.y =
-      Math.sin(clock.elapsedTime * 0.12) * 0.16 + pointer.x * 0.08;
-    group.current.rotation.x = pointer.y * 0.04;
+    group.current.rotation.y = clock.elapsedTime * 0.18 + pointer.x * 0.08;
+    group.current.rotation.x =
+      0.12 + Math.sin(clock.elapsedTime * 0.2) * 0.08 + pointer.y * 0.04;
   });
   return (
     <group ref={group} rotation={[0.12, 0, -0.3]}>
       <Float speed={0.6} rotationIntensity={0.08} floatIntensity={0.15}>
         <mesh>
-          <sphereGeometry args={[1.3, 48, 48]} />
+          <sphereGeometry args={[1.3, 32, 24]} />
           <meshStandardMaterial
             color="#10283a"
             metalness={0.83}
@@ -33,14 +33,12 @@ function Sculpture({
             color="#50809a"
             wireframe
             transparent
-            opacity={0.055}
+            opacity={0.18}
           />
         </mesh>
         {[0, 1, 2].map((n) => (
           <mesh key={n} rotation={[Math.PI / 2 + n * 0.31, n * 0.38, 0.2]}>
-            <torusGeometry
-              args={[1.85 + n * 0.22, 0.012 + n * 0.005, 12, 160]}
-            />
+            <torusGeometry args={[1.85 + n * 0.22, 0.012 + n * 0.005, 8, 96]} />
             <meshStandardMaterial
               color={n === 1 ? "#8acde8" : "#d6ac70"}
               emissive={n === 1 ? "#456a80" : "#a87532"}
@@ -77,9 +75,11 @@ function Sculpture({
   );
 }
 export default function OrbitalScene({
+  active,
   interactive = false,
   onSelect,
 }: {
+  active: boolean;
   interactive?: boolean;
   onSelect?: (index: number) => void;
 }) {
@@ -94,7 +94,7 @@ export default function OrbitalScene({
     <Canvas
       dpr={[1, mobile ? 1 : 1.5]}
       camera={{ position: [0, 0, 6.4], fov: 45 }}
-      frameloop={visible ? "always" : "never"}
+      frameloop={visible && active ? "always" : "never"}
       gl={{ alpha: true, antialias: !mobile, powerPreference: "low-power" }}
     >
       <ambientLight intensity={0.55} />

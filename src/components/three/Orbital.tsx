@@ -38,13 +38,14 @@ export default function Orbital({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
+    if (!inView || reduced || ready) return;
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
     if (!gl) return;
     gl.getExtension("WEBGL_lose_context")?.loseContext();
     const timer = setTimeout(() => setReady(true), 400);
     return () => clearTimeout(timer);
-  }, []);
+  }, [inView, reduced, ready]);
   return (
     <div
       ref={host}
@@ -58,10 +59,14 @@ export default function Orbital({
         <i />
         <span />
       </div>
-      {ready && inView && !reduced && (
+      {ready && !reduced && (
         <Boundary>
           <Suspense fallback={null}>
-            <Scene interactive={interactive} onSelect={onSelect} />
+            <Scene
+              active={inView}
+              interactive={interactive}
+              onSelect={onSelect}
+            />
           </Suspense>
         </Boundary>
       )}

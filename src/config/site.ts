@@ -1,8 +1,7 @@
 export const config = {
-  contactEndpoint:
-    import.meta.env.VITE_CONTACT_ENDPOINT ||
-    "https://formsubmit.co/ajax/pedrosebastiaojl@gmail.com",
-  whatsapp: (import.meta.env.VITE_WHATSAPP_NUMBER || "").replace(/\D/g, ""),
+  whatsapp: "5588996645739",
+  whatsappMessage:
+    "Olá! Vim pelo site da ORION e gostaria de conversar sobre um projeto.",
   logo:
     import.meta.env.VITE_LOGO_URL ||
     `${import.meta.env.BASE_URL}orion-futurista.png`,
