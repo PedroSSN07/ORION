@@ -67,10 +67,19 @@ export default function AudioControl() {
   useEffect(() => {
     if (!enabled) return;
 
-    const chime = () => {
+    let lastClick = -Infinity;
+    const chime = (event: MouseEvent) => {
+      if (
+        !(event.target instanceof Element) ||
+        !event.target.closest("a, button, [role=tab]") ||
+        event.target.closest(".sound-control")
+      )
+        return;
       const engine = audio.current;
       if (!engine || engine.context.state !== "running" || document.hidden)
         return;
+      if (engine.context.currentTime - lastClick < 0.12) return;
+      lastClick = engine.context.currentTime;
       playTechClick(engine.context, engine.master);
     };
     document.addEventListener("click", chime, true);

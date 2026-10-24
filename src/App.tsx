@@ -14,13 +14,13 @@ import {
   PenTool,
   Workflow,
   RefreshCw,
-  ArrowRight,
   Check,
 } from "lucide-react";
 import Header, { Brand } from "./components/layout/Header";
 import AudioControl from "./components/ui/AudioControl";
 import PointerEffects from "./components/ui/PointerEffects";
-import Orbital from "./components/three/Orbital";
+import Hero from "./sections/Hero";
+import Intro from "./components/ui/Intro";
 import Contact from "./sections/Contact";
 import Projects from "./sections/Projects";
 import Universe from "./sections/Universe";
@@ -89,69 +89,10 @@ export default function App() {
           className="page-progress"
           style={{ scaleX: scrollYProgress }}
         />
+        <Intro />
         <Header />
         <main id="conteudo">
-          <section id="inicio" className="hero">
-            <div className="hero-grid" />
-            <div className="hero-orbit">
-              <Orbital />
-            </div>
-            <div className="hero-content">
-              <motion.p
-                className="eyebrow"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1 }}
-              >
-                <span className="status-dot" /> IDEIAS SEM LIMITES. TECNOLOGIA
-                COM PROPÓSITO.
-              </motion.p>
-              <motion.h1
-                initial={{ opacity: 0, y: reduced ? 0 : 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.1 }}
-              >
-                Transformamos
-                <br />
-                ideias em experiências
-                <br />
-                digitais <em>extraordinárias.</em>
-              </motion.h1>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 1 }}
-              >
-                <p className="hero-description">
-                  Desenvolvemos soluções tecnológicas que conectam
-                  <br className="desktop-break" /> criatividade, inovação e
-                  resultados.
-                </p>
-                <div className="hero-actions">
-                  <a href="#solucoes" className="button gold">
-                    Explorar soluções <ArrowUpRight size={18} />
-                  </a>
-                  <a href="#contato" className="button plain">
-                    Começar um projeto <ArrowRight size={17} />
-                  </a>
-                </div>
-              </motion.div>
-            </div>
-            <div className="hero-bottom">
-              <a href="#sobre">
-                <span className="scroll-icon">
-                  <ArrowDown size={15} />
-                </span>{" "}
-                CONTINUE EXPLORANDO
-              </a>
-              <span className="hero-tag">
-                TECNOLOGIA QUE IMPULSIONA O AMANHÃ.
-              </span>
-              <span className="coordinates">
-                DESIGN & CÓDIGO <span>—</span> BRASIL
-              </span>
-            </div>
-          </section>
+          <Hero />
           <div className="capability-strip">
             <span>ESTRATÉGIA</span>
             <i />
@@ -165,9 +106,9 @@ export default function App() {
             <div className="about-grid">
               <div className="about-identity">
                 <h2>
-                  O futuro começa
+                  Grandes ideias
                   <br />
-                  com <em>uma ideia.</em>
+                  merecem <em>ir além.</em>
                 </h2>
                 <img
                   className="identity-art"
@@ -181,9 +122,8 @@ export default function App() {
               </div>
               <div>
                 <p className="lead">
-                  E ganha vida quando criatividade
-                  <br className="desktop-break" /> e tecnologia encontram
-                  direção.
+                  Tecnologia não é apenas escrever código. É abrir
+                  possibilidades.
                 </p>
                 <p>
                   Somos a O.R.I.O.N. — Organização de Recursos, Inovação,
@@ -212,9 +152,9 @@ export default function App() {
               <div>
                 <p className="eyebrow">02 / O QUE PODEMOS CONSTRUIR</p>
                 <h2>
-                  Seu desafio.
+                  Soluções digitais para
                   <br />
-                  <em>Nossa próxima órbita.</em>
+                  <em>novas possibilidades.</em>
                 </h2>
               </div>
               <p>
@@ -234,6 +174,14 @@ export default function App() {
                     onPointerMove={(e) => {
                       if (reduced || e.pointerType !== "mouse") return;
                       const r = e.currentTarget.getBoundingClientRect();
+                      e.currentTarget.style.setProperty(
+                        "--mx",
+                        `${e.clientX - r.left}px`,
+                      );
+                      e.currentTarget.style.setProperty(
+                        "--my",
+                        `${e.clientY - r.top}px`,
+                      );
                       e.currentTarget.style.setProperty(
                         "--rx",
                         `${-(e.clientY - r.top - r.height / 2) / 90}deg`,
@@ -281,9 +229,8 @@ export default function App() {
               <div>
                 <p className="eyebrow">03 / DA IDEIA AO IMPACTO</p>
                 <h2>
-                  Uma visão clara.
-                  <br />
-                  <em>Uma jornada juntos.</em>
+                  Da primeira ideia
+                  <br />à <em>solução final.</em>
                 </h2>
               </div>
               <p>
@@ -311,19 +258,19 @@ export default function App() {
             <p className="eyebrow">05 / ALÉM DO CÓDIGO</p>
             <div className="difference-grid">
               <h2>
-                O detalhe faz
+                Cada detalhe
                 <br />
-                <em>a diferença.</em>
+                <em>importa.</em>
                 <span className="editorial-star">✳</span>
               </h2>
               <div>
                 {[
-                  "Soluções personalizadas",
-                  "Design moderno",
-                  "Código de qualidade",
-                  "Responsividade",
-                  "Foco na experiência do usuário",
-                  "Tecnologia orientada a resultados",
+                  "Desenvolvimento personalizado",
+                  "Experiências responsivas",
+                  "Interfaces intuitivas",
+                  "Qualidade técnica",
+                  "Criatividade aplicada",
+                  "Compromisso com cada projeto",
                 ].map((s, i) => (
                   <div className="difference-row" key={s}>
                     <span>0{i + 1}</span>
@@ -349,6 +296,7 @@ export default function App() {
           <Contact />
         </main>
         <footer className="footer">
+          <div className="footer-orbit" aria-hidden="true" />
           <div className="footer-top">
             <div>
               <Brand />
@@ -362,12 +310,27 @@ export default function App() {
             </div>
             <div>
               <span>CONECTE-SE</span>
+              <a
+                href={`https://wa.me/${config.whatsapp}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                WhatsApp <ArrowUpRight size={14} />
+              </a>
               <a href="#contato">
                 Começar um projeto <ArrowUpRight size={14} />
               </a>
               {config.socials.map((s) => (
                 <a href={s.url} key={s.label} target="_blank" rel="noreferrer">
                   {s.label} <ArrowUpRight size={14} />
+                </a>
+              ))}
+            </div>
+            <div className="footer-services">
+              <span>SOLUÇÕES</span>
+              {solutions.map((s) => (
+                <a key={s.title} href="#solucoes">
+                  {s.title}
                 </a>
               ))}
             </div>

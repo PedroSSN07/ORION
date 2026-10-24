@@ -1,53 +1,88 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { config } from "../../config/site";
-export function Brand({ full = false }: { full?: boolean }) {
+const links = [
+  ["sobre", "Essência"],
+  ["solucoes", "Soluções"],
+  ["projetos", "Projetos"],
+  ["universo", "Universo"],
+];
+export function Brand({ full = false, onClick }: { full?: boolean; onClick?: () => void }) {
   return (
-    <a className="brand" href="#inicio" aria-label="O.R.I.O.N. início">
-      {config.logo ? (
-        <span className={full ? "brand-full" : "brand-custom"}>
-          <img src={config.logo} alt="O.R.I.O.N." width="1774" height="887" />
-        </span>
-      ) : (
-        <span>
-          O.R.I.O.N<span className="brand-dot">.</span>
-        </span>
-      )}
+    <a className="brand" href="#inicio" aria-label="O.R.I.O.N. início" onClick={onClick}>
+      <span className={full ? "brand-full" : "brand-custom"}>
+        <img src={config.logo} alt="O.R.I.O.N." width="1774" height="887" />
+      </span>
     </a>
   );
 }
 export default function Header() {
-  const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const header = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const update = () =>
+      header.current?.classList.toggle("scrolled", window.scrollY > 40);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    const close = () => {
+      if (window.innerWidth > 760) dialog.current?.close();
+    };
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", close);
+    };
+  }, []);
   return (
-    <header className="header">
+    <header className="header" ref={header}>
       <Brand full />
-      <nav
-        aria-label="Navegação principal"
-        className={open ? "nav open" : "nav"}
-        id="navigation"
-      >
-        {[
-          ["sobre", "Sobre nós"],
-          ["solucoes", "Soluções"],
-          ["projetos", "Projetos"],
-        ].map(([id, label]) => (
-          <a key={id} href={`#${id}`} onClick={() => setOpen(false)}>
+      <nav className="desktop-nav" aria-label="Navegação principal">
+        {links.map(([id, label]) => (
+          <a key={id} href={`#${id}`}>
             {label}
           </a>
         ))}
-        <a className="nav-cta" href="#contato" onClick={() => setOpen(false)}>
-          Vamos conversar <ArrowUpRight size={16} />
+        <a className="nav-cta" href="#contato">
+          Vamos criar <ArrowUpRight size={17} />
         </a>
       </nav>
       <button
         className="menu-toggle"
-        aria-expanded={open}
-        aria-controls="navigation"
-        aria-label={open ? "Fechar menu" : "Abrir menu"}
-        onClick={() => setOpen(!open)}
+        aria-label="Abrir menu"
+        aria-haspopup="dialog"
+        onClick={() => dialog.current?.showModal()}
       >
-        {open ? <X /> : <Menu />}
+        <Menu />
       </button>
+      <dialog
+        ref={dialog}
+        className="mobile-menu"
+        aria-label="Menu de navegação"
+      >
+        <div className="mobile-menu-top">
+          <Brand onClick={() => dialog.current?.close()} />
+          <button
+            autoFocus
+            aria-label="Fechar menu"
+            onClick={() => dialog.current?.close()}
+          >
+            <X />
+          </button>
+        </div>
+        <nav aria-label="Navegação mobile">
+          {links.map(([id, label], i) => (
+            <a key={id} href={`#${id}`} onClick={() => dialog.current?.close()}>
+              <small>0{i + 1}</small>
+              {label}
+              <ArrowUpRight />
+            </a>
+          ))}
+          <a href="#contato" onClick={() => dialog.current?.close()}>
+            Começar meu projeto <ArrowUpRight />
+          </a>
+        </nav>
+        <p>Tecnologia que impulsiona o amanhã.</p>
+      </dialog>
     </header>
   );
 }

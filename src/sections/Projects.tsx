@@ -1,25 +1,6 @@
 import { useState } from "react";
 import { ArrowUpRight, X, ArrowRight } from "lucide-react";
-const projects = [
-  {
-    name: "Atlas",
-    kind: "PLATAFORMA ANALÍTICA",
-    theme: "atlas",
-    title: "Clareza para decisões complexas.",
-    description:
-      "Conceito de dashboard que reúne indicadores, atividade e visão geral em uma interface organizada. Os números exibidos são ilustrativos.",
-    tags: ["Interface", "Dashboard", "Design system"],
-  },
-  {
-    name: "Forma",
-    kind: "EXPERIÊNCIA EDITORIAL",
-    theme: "forma",
-    title: "Espaço para o essencial.",
-    description:
-      "Estudo de site para um estúdio de arquitetura imaginário. Tipografia editorial e composição espacial valorizam o conteúdo. Não representa um cliente real.",
-    tags: ["Website", "Direção de arte", "Experiência"],
-  },
-];
+import { projects } from "../config/projects";
 export default function Projects() {
   const [selected, setSelected] = useState<number | null>(null);
   return (
@@ -28,9 +9,9 @@ export default function Projects() {
         <div>
           <p className="eyebrow">04 / POSSIBILIDADES EM PRÁTICA</p>
           <h2>
-            Ideias que ganham
+            Projetos que transformam
             <br />
-            <em>outra dimensão.</em>
+            ideias em <em>experiências.</em>
           </h2>
         </div>
         <p>
@@ -105,6 +86,19 @@ export default function Projects() {
                   <small>ARQUITETURA EM PERSPECTIVA — ESTUDO AUTORAL</small>
                 </div>
               )}
+              <div
+                className={`project-phone phone-${p.theme}`}
+                aria-hidden="true"
+              >
+                <i />
+                <span>{p.name}</span>
+                <div className="phone-display">
+                  <b />
+                  <b />
+                  <b />
+                </div>
+                <small>ESTUDO MOBILE</small>
+              </div>
             </div>
             <div className="project-meta">
               <div>
@@ -147,6 +141,12 @@ export default function Projects() {
           </p>
           <h2 id="project-title">{projects[selected].title}</h2>
           <p>{projects[selected].description}</p>
+          <h3 className="project-scope">O que este conceito explora</h3>
+          <ul className="project-features">
+            {projects[selected].features.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
+          </ul>
           <div className="tags">
             {projects[selected].tags.map((t) => (
               <span key={t}>{t}</span>

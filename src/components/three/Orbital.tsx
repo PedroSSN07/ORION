@@ -21,12 +21,19 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
 export default function Orbital({
   interactive = false,
   onSelect,
+  selected = null,
+  rotate = false,
+  staticMode = false,
 }: {
   interactive?: boolean;
   onSelect?: (index: number) => void;
+  selected?: number | null;
+  rotate?: boolean;
+  staticMode?: boolean;
 }) {
   const reduced = useReducedMotion();
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
@@ -38,18 +45,26 @@ export default function Orbital({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    if (!inView || reduced || ready) return;
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2");
-    if (!gl) return;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    const timer = setTimeout(() => setReady(true), 400);
+    if (!inView || reduced || ready || staticMode || failed) return;
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl2");
+      if (!gl) {
+        setFailed(true);
+        return;
+      }
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      setFailed(true);
+      return;
+    }
+    const timer = setTimeout(() => setReady(true), 350);
     return () => clearTimeout(timer);
-  }, [inView, reduced, ready]);
+  }, [inView, reduced, ready, staticMode, failed]);
   return (
     <div
       ref={host}
-      className={`orbital ${interactive ? "interactive-orbital" : ""}`}
+      className={`orbital ${interactive ? "interactive-orbital" : ""} ${rotate ? "can-rotate" : ""} ${staticMode ? "static-orbital" : ""}`}
       aria-hidden="true"
     >
       <div className="orbital-fallback">
@@ -59,13 +74,16 @@ export default function Orbital({
         <i />
         <span />
       </div>
-      {ready && !reduced && (
+      {ready && !reduced && !staticMode && !failed && (
         <Boundary>
           <Suspense fallback={null}>
             <Scene
               active={inView}
               interactive={interactive}
               onSelect={onSelect}
+              selected={selected}
+              rotate={rotate}
+              onFailure={() => setFailed(true)}
             />
           </Suspense>
         </Boundary>

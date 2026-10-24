@@ -1,5 +1,8 @@
 export const config = {
-  whatsapp: "5588996645739",
+  whatsapp: (import.meta.env.VITE_WHATSAPP_NUMBER || "5588996645739").replace(
+    /\D/g,
+    "",
+  ),
   whatsappMessage:
     "Olá! Vim pelo site da ORION e gostaria de conversar sobre um projeto.",
   logo:
@@ -17,7 +20,7 @@ export const solutions = [
     tag: "SITES & PLATAFORMAS",
   },
   {
-    title: "Sistemas Sob Medida",
+    title: "Sistemas Personalizados",
     text: "Da complexidade à clareza. Aplicações pensadas para a realidade do seu negócio.",
     tag: "SOFTWARE & PRODUTOS",
   },
@@ -27,12 +30,12 @@ export const solutions = [
     tag: "DESIGN & EXPERIÊNCIA",
   },
   {
-    title: "Automação e Integrações",
+    title: "Integrações e Automações",
     text: "Ferramentas conectadas. Processos mais simples. Mais espaço para o que importa.",
     tag: "CONEXÕES & EFICIÊNCIA",
   },
   {
-    title: "Manutenção e Evolução",
+    title: "Evolução de Projetos",
     text: "Seu produto continua em movimento. Cuidado técnico para acompanhar novos desafios.",
     tag: "SUPORTE & CONTINUIDADE",
   },

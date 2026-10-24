@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 test("all internal navigation targets exist", () => {
   const sources = [
     "src/App.tsx",
+    "src/sections/Hero.tsx",
     "src/sections/Contact.tsx",
     "src/sections/Universe.tsx",
     "src/sections/Projects.tsx",

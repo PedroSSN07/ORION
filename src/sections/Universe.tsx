@@ -1,75 +1,113 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { RotateCcw, Move, LayoutGrid } from "lucide-react";
 import Orbital from "../components/three/Orbital";
 import { pillars } from "../config/site";
 export default function Universe() {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState<number | null>(null);
+  const [rotate, setRotate] = useState(false);
+  const [staticMode, setStaticMode] = useState(false);
+  const reduced = useReducedMotion();
   return (
     <section id="universo" className="section universe">
       <div className="universe-title">
-        <p className="eyebrow">06 / CONEXÕES QUE NOS MOVEM</p>
+        <p className="eyebrow">06 / UM UNIVERSO DE POSSIBILIDADES</p>
         <h2>
-          Explore o universo
+          Uma essência.
           <br />
-          <em>O.R.I.O.N.</em>
+          <em>Quatro dimensões.</em>
         </h2>
         <p>
-          Quatro pilares. Infinitas possibilidades.
-          <br />
-          Selecione um ponto para conhecer nossa essência.
+          Explore o universo O.R.I.O.N. Cada planeta representa uma forma de
+          transformar ideias em valor.
         </p>
       </div>
       <div className="universe-stage">
-        <Orbital interactive onSelect={setActive} />
-        <span className="universe-caption">UM UNIVERSO DE POSSIBILIDADES</span>
+        <Orbital
+          interactive
+          onSelect={setActive}
+          selected={active}
+          rotate={rotate}
+          staticMode={staticMode}
+        />
+        <span className="universe-caption">
+          {staticMode || reduced
+            ? "MODO ESTÁTICO · EXPLORE PELOS CARDS"
+            : rotate
+              ? "ARRASTE PARA GIRAR · TOQUE EM UM PLANETA"
+              : "SELECIONE UM PLANETA OU EXPLORE PELOS CARDS"}
+        </span>
+      </div>
+      <div className="universe-controls">
+        <button
+          aria-pressed={rotate}
+          disabled={staticMode || Boolean(reduced)}
+          onClick={() => setRotate(!rotate)}
+        >
+          <Move size={15} />
+          {rotate ? "Parar rotação manual" : "Ativar rotação manual"}
+        </button>
+        <button
+          aria-pressed={staticMode}
+          onClick={() => {
+            setStaticMode(!staticMode);
+            setRotate(false);
+          }}
+        >
+          <LayoutGrid size={15} />
+          Modo sem 3D
+        </button>
+        <button
+          onClick={() => {
+            setActive(null);
+            setRotate(false);
+          }}
+          disabled={active === null && !rotate}
+        >
+          <RotateCcw size={15} />
+          Visão geral
+        </button>
       </div>
       <div className="pillar-panel">
-        <div
-          className="pillar-tabs"
-          role="tablist"
-          aria-label="Pilares da O.R.I.O.N."
-        >
+        <div className="pillar-cards" aria-label="Pilares da O.R.I.O.N.">
           {pillars.map((p, i) => (
             <button
               key={p.name}
-              id={`pillar-tab-${i}`}
-              role="tab"
-              aria-selected={active === i}
+              className={`pillar-card pillar-${i}`}
+              aria-pressed={active === i}
               aria-controls="pillar-content"
-              tabIndex={active === i ? 0 : -1}
-              onKeyDown={(e) => {
-                let next = i;
-                if (e.key === "ArrowRight") next = (i + 1) % 4;
-                else if (e.key === "ArrowLeft") next = (i + 3) % 4;
-                else if (e.key === "Home") next = 0;
-                else if (e.key === "End") next = 3;
-                else return;
-                e.preventDefault();
-                setActive(next);
-                document.getElementById(`pillar-tab-${next}`)?.focus();
-              }}
               onClick={() => setActive(i)}
             >
-              <span>0{i + 1}</span>
-              {p.name}
+              <span className="mini-planet" aria-hidden="true" />
+              <small>0{i + 1}</small>
+              <strong>{p.name}</strong>
+              <span>Explorar ↗</span>
             </button>
           ))}
         </div>
         <div
           id="pillar-content"
-          role="tabpanel"
-          aria-labelledby={`pillar-tab-${active}`}
-          tabIndex={0}
+          className="pillar-description"
+          aria-live="polite"
         >
           <AnimatePresence mode="wait">
-            <motion.p
-              key={active}
+            <motion.div
+              key={active === null ? "overview" : active}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              {pillars[active].text}
-            </motion.p>
+              <h3>
+                {active === null
+                  ? "Explore uma nova perspectiva."
+                  : pillars[active].name}
+              </h3>
+              <p>
+                {active === null
+                  ? "Tecnologia, criatividade, inovação e resultados se conectam em cada projeto. Escolha uma dimensão para se aproximar."
+                  : pillars[active].text}
+              </p>
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
