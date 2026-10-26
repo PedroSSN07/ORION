@@ -1,10 +1,16 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowUpRight, Check, MessageCircle } from "lucide-react";
 import { config, solutions } from "../config/site";
 import { buildWhatsAppUrl, type Brief } from "../lib/brief";
 export default function Contact() {
   const [readyUrl, setReadyUrl] = useState("");
   const [error, setError] = useState("");
+  const nextStep = useRef<HTMLAnchorElement>(null);
+  const errorMessage = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (readyUrl) nextStep.current?.focus();
+    else if (error) errorMessage.current?.focus();
+  }, [readyUrl, error]);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const fields = Object.fromEntries(
@@ -135,7 +141,7 @@ export default function Contact() {
           Preparar solicitação <ArrowUpRight size={18} />
         </button>
         {error && (
-          <p role="alert" className="form-status error">
+          <p ref={errorMessage} tabIndex={-1} role="alert" className="form-status error">
             {error}
           </p>
         )}
@@ -146,6 +152,7 @@ export default function Contact() {
             <a
               className="button"
               href={readyUrl}
+              ref={nextStep}
               target="_blank"
               rel="noopener noreferrer"
             >

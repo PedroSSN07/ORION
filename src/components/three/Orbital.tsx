@@ -9,10 +9,13 @@ import {
 } from "react";
 import { useReducedMotion } from "motion/react";
 const Scene = lazy(() => import("./OrbitalScene"));
-class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class Boundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onFailure();
   }
   render() {
     return this.state.failed ? null : this.props.children;
@@ -24,18 +27,23 @@ export default function Orbital({
   selected = null,
   rotate = false,
   staticMode = false,
+  onUnavailable,
 }: {
   interactive?: boolean;
   onSelect?: (index: number) => void;
   selected?: number | null;
   rotate?: boolean;
   staticMode?: boolean;
+  onUnavailable?: (unavailable: boolean) => void;
 }) {
   const reduced = useReducedMotion();
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  useEffect(() => {
+    onUnavailable?.(failed);
+  }, [failed, onUnavailable]);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry.isIntersecting),
@@ -75,7 +83,7 @@ export default function Orbital({
         <span />
       </div>
       {ready && !reduced && !staticMode && !failed && (
-        <Boundary>
+        <Boundary onFailure={() => setFailed(true)}>
           <Suspense fallback={null}>
             <Scene
               active={inView}

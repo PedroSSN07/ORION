@@ -7,7 +7,9 @@ export default function Universe() {
   const [active, setActive] = useState<number | null>(null);
   const [rotate, setRotate] = useState(false);
   const [staticMode, setStaticMode] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const reduced = useReducedMotion();
+  const canRotate = !staticMode && !reduced && !unavailable;
   return (
     <section id="universo" className="section universe">
       <div className="universe-title">
@@ -27,11 +29,14 @@ export default function Universe() {
           interactive
           onSelect={setActive}
           selected={active}
-          rotate={rotate}
+          rotate={rotate && canRotate}
           staticMode={staticMode}
+          onUnavailable={setUnavailable}
         />
         <span className="universe-caption">
-          {staticMode || reduced
+          {unavailable
+            ? "3D INDISPONÍVEL · EXPLORE PELOS CARDS"
+            : staticMode || reduced
             ? "MODO ESTÁTICO · EXPLORE PELOS CARDS"
             : rotate
               ? "ARRASTE PARA GIRAR · TOQUE EM UM PLANETA"
@@ -40,12 +45,12 @@ export default function Universe() {
       </div>
       <div className="universe-controls">
         <button
-          aria-pressed={rotate}
-          disabled={staticMode || Boolean(reduced)}
+          aria-pressed={rotate && canRotate}
+          disabled={!canRotate}
           onClick={() => setRotate(!rotate)}
         >
           <Move size={15} />
-          {rotate ? "Parar rotação manual" : "Ativar rotação manual"}
+          {rotate && canRotate ? "Parar rotação manual" : "Ativar rotação manual"}
         </button>
         <button
           aria-pressed={staticMode}
@@ -96,6 +101,7 @@ export default function Universe() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
             >
               <h3>
                 {active === null

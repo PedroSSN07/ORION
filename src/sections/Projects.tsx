@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, X, ArrowRight } from "lucide-react";
 import { projects } from "../config/projects";
 export default function Projects() {
   const [selected, setSelected] = useState<number | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (selected === null) return;
+    const element = dialog.current;
+    element?.showModal();
+    return () => {
+      element?.close();
+      trigger.current?.focus({ preventScroll: true });
+    };
+  }, [selected]);
   return (
     <section id="projetos" className="section projects">
       <div className="section-heading">
@@ -25,7 +36,10 @@ export default function Projects() {
           <button
             className="project-card"
             key={p.name}
-            onClick={() => setSelected(i)}
+            onClick={(event) => {
+              trigger.current = event.currentTarget;
+              setSelected(i);
+            }}
             aria-haspopup="dialog"
           >
             <div className={`project-art ${p.theme}`}>
@@ -117,14 +131,8 @@ export default function Projects() {
       </div>
       {selected !== null && (
         <dialog
-          open
           className="project-dialog"
-          ref={(el) => {
-            if (el && !el.matches(":modal")) {
-              el.close();
-              el.showModal();
-            }
-          }}
+          ref={dialog}
           onCancel={() => setSelected(null)}
           aria-labelledby="project-title"
         >
@@ -152,6 +160,11 @@ export default function Projects() {
               <span key={t}>{t}</span>
             ))}
           </div>
+          {projects[selected].demoUrl?.startsWith("https://") && (
+            <a className="text-link" href={projects[selected].demoUrl} target="_blank" rel="noopener noreferrer">
+              Ver demonstração <ArrowUpRight size={18} />
+            </a>
+          )}
           <a
             href="#contato"
             className="text-link"
